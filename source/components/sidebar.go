@@ -45,29 +45,43 @@ func SidebarSectionWithActions(c *ui.Context, label string, actions func(c *ui.C
 	return section
 }
 
+// SidebarItemOptions adjusts the chosen row's face. Face overrides the
+// neutral alpha block — for a sidebar that sits on a tint, where the chosen
+// row reads as a raised tile instead of a deeper shade.
+type SidebarItemOptions struct {
+	Face ui.Color
+}
+
+func itemFace(t *ui.Theme, opts []SidebarItemOptions) ui.Color {
+	if len(opts) > 0 && opts[0].Face.A != 0 {
+		return opts[0].Face
+	}
+	return t.Text.Alpha(.1)
+}
+
 // SidebarItem creates a navigation button with a neutral selected face and an
 // optional accent-colored icon. Hover does not change its face. The caller
 // supplies selection and handles Clicked; MyGo provides Tab focus and activation
 // with Enter or Space, not tree-style arrow navigation. Key can distinguish
 // items with identical labels. A nil icon leaves no icon space.
-func SidebarItem(c *ui.Context, label string, icon *ui.SVG, selected bool) ui.Element {
+func SidebarItem(c *ui.Context, label string, icon *ui.SVG, selected bool, opts ...SidebarItemOptions) ui.Element {
 	return SidebarItemWithLeading(c, label, selected, func(c *ui.Context, size float32) {
 		if icon != nil {
 			Icon(c, icon).Size(size, size).TextColor(c.Theme().Accent)
 		}
-	})
+	}, opts...)
 }
 
 // SidebarImageItem is a SidebarItem led by an image, such as an application's
 // project logo, in place of the icon. The image keeps its own colors, fits
 // within the icon's square without cropping and has slightly rounded corners.
 // A nil image leaves no icon space.
-func SidebarImageItem(c *ui.Context, label string, image ui.ImageSource, selected bool) ui.Element {
+func SidebarImageItem(c *ui.Context, label string, image ui.ImageSource, selected bool, opts ...SidebarItemOptions) ui.Element {
 	return SidebarItemWithLeading(c, label, selected, func(c *ui.Context, size float32) {
 		if image != nil {
 			ui.Image(c, image).Size(size, size).Fit(ui.Contain).Radius(size * .2).Shrink(0)
 		}
-	})
+	}, opts...)
 }
 
 // SidebarItemWithLeading is a SidebarItem with an application-built leading
@@ -76,8 +90,8 @@ func SidebarImageItem(c *ui.Context, label string, image ui.ImageSource, selecte
 // suggestion and owns its content's size and appearance. Keep it non-interactive
 // so the navigation button remains the only focus and activation target.
 // It runs synchronously on the UI thread and must not start I/O or background work.
-func SidebarItemWithLeading(c *ui.Context, label string, selected bool, leading func(c *ui.Context, size float32)) ui.Element {
-	return SidebarItemWithSlots(c, label, selected, leading, nil)
+func SidebarItemWithLeading(c *ui.Context, label string, selected bool, leading func(c *ui.Context, size float32), opts ...SidebarItemOptions) ui.Element {
+	return SidebarItemWithContent(c, label, selected, leading, nil, nil, opts...)
 }
 
 // SidebarItemWithSlots is a SidebarItemWithLeading with an application-built
@@ -86,8 +100,8 @@ func SidebarItemWithLeading(c *ui.Context, label string, selected bool, leading 
 // not fit. Nil builders leave no space. Both builders receive the standard
 // icon size and follow the leading slot's rules: keep them non-interactive
 // and free of I/O or background work.
-func SidebarItemWithSlots(c *ui.Context, label string, selected bool, leading, trailing func(c *ui.Context, size float32)) ui.Element {
-	return SidebarItemWithContent(c, label, selected, leading, nil, trailing)
+func SidebarItemWithSlots(c *ui.Context, label string, selected bool, leading, trailing func(c *ui.Context, size float32), opts ...SidebarItemOptions) ui.Element {
+	return SidebarItemWithContent(c, label, selected, leading, nil, trailing, opts...)
 }
 
 // SidebarItemWithContent is a SidebarItemWithSlots whose visible label is
@@ -96,13 +110,13 @@ func SidebarItemWithSlots(c *ui.Context, label string, selected bool, leading, t
 // as plain text. With a trailing slot, the returned element takes the
 // remaining room and may shrink below its natural width. Content follows the
 // leading slot's rules.
-func SidebarItemWithContent(c *ui.Context, label string, selected bool, leading func(c *ui.Context, size float32), content func(c *ui.Context) ui.Element, trailing func(c *ui.Context, size float32)) ui.Element {
+func SidebarItemWithContent(c *ui.Context, label string, selected bool, leading func(c *ui.Context, size float32), content func(c *ui.Context) ui.Element, trailing func(c *ui.Context, size float32), opts ...SidebarItemOptions) ui.Element {
 	t := c.Theme()
 	b := ui.ButtonBase(c).Key(label).Label(label).FillWidth().Justify(ui.Start).
 		Padding(t.Space(1.75), t.Space(2)).Gap(t.Space(2)).Radius(t.Radius).
 		Selected(selected).Background(ui.Color{}).TextColor(t.Text)
 	if selected {
-		b.Background(t.Text.Alpha(.1))
+		b.Background(itemFace(t, opts))
 	}
 	b.Children(func() {
 		if leading != nil {
