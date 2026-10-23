@@ -30,3 +30,4 @@ upstream/main ──ff-only──> main（镜像）        float-local（桌面�
 | 主题分支 | 内容 | 为什么桌面需要 | 上游状态 |
 |---|---|---|---|
 | `sidebar-item-face` | 为 `SidebarItemOptions.Face`：`SidebarItem` 系列组件支持可选参数，覆盖选中项的默认 `Text.Alpha(.1)` 底色 | Float 的侧栏浮在有色背景上，选中项需要"凸起浮雕"而不是加深的 alpha 块 | 未提 PR；上游若以其它写法支持该能力，本主题作废并删除 |
+| `primary-hover` | `ButtonPrimary` 悬停不再压暗强调色底，改为按钮下方一圈强调色淡投影（"浮起"）；按下才压暗一档 | Float 的强调色是偏深的橙：任何黑混加深都读成棕"脏色"，投影抬升是颜色不变的主流反馈 | 未提 PR；主要影响悬停观感，若上游改了悬停机制需按语义合并 |
