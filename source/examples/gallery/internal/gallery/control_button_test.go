@@ -138,6 +138,13 @@ func TestControlButtonPointerStyles(t *testing.T) {
 					if hover != rest || pressed != rest {
 						t.Fatalf("%v/%s: disabled button changed on pointer input", dark, label)
 					}
+				} else if label == "Primary" {
+					// The primary keeps its accent fill on hover: its lift
+					// is a shadow the pixel sampling cannot see. The press
+					// still darkens the fill.
+					if pressed == hover {
+						t.Fatalf("%v/%s: missing pressed feedback", dark, label)
+					}
 				} else if hover == rest || pressed == hover {
 					t.Fatalf("%v/%s: missing hover or pressed feedback", dark, label)
 				}

@@ -256,8 +256,10 @@ func TestButtonPrimaryBorderAndHeight(t *testing.T) {
 		}
 		tt.Move(390, 90)
 		check(palette.Accent)
+		// Hovering keeps the accent fill (no scrim over the accent); the
+		// press still darkens one step.
 		tt.Move(x, y)
-		check(palette.AccentHover)
+		check(palette.Accent)
 		tt.Press(x, y)
 		check(palette.AccentPressed)
 		tt.Release(x, y)
