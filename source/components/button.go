@@ -50,7 +50,12 @@ func styleButton(c *ui.Context, b ui.Element, variant ButtonVariant) ui.Element 
 	var shadow ui.Color
 	switch variant {
 	case ButtonPrimary:
-		bg, hover, pressed, fg, border = t.Accent, t.AccentHover, t.AccentPressed, t.AccentText, ui.Color{}
+		// The primary keeps its accent fill on hover: darkening a saturated
+		// accent dulls it into a scrim (dark oranges read brown), so the
+		// pointer feedback is a soft accent-tinted lift drawn below instead;
+		// pressed still darkens one step for the held weight.
+		bg, pressed, fg = t.Accent, t.AccentPressed, t.AccentText
+		hover = bg
 	case ButtonSecondary:
 		bg, fg = t.Background.Mix(t.Text, .08), t.Text
 		hover, pressed = t.Background.Mix(t.Text, .12), t.Background.Mix(t.Text, .18)
@@ -74,6 +79,11 @@ func styleButton(c *ui.Context, b ui.Element, variant ButtonVariant) ui.Element 
 	}
 	if variant == ButtonPrimary {
 		border = bg
+		// The hover lift: a small accent-colored shadow instead of a fill
+		// change. A pressed button sits down, so it gets no lift.
+		if b.Hovered() && !b.Pressed() && !b.IsDisabled() {
+			b.Shadow(0, 2, 6, 0, t.Accent.Alpha(0.35))
+		}
 	}
 	// A transparent Ghost border reserves the same space as the filled variants.
 	b.Radius(radius).Background(bg).TextColor(fg).Border(1, border)
