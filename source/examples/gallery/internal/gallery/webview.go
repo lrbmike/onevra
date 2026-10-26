@@ -21,13 +21,20 @@ import (
 // loaded is the theme and language its page was last rendered for. covered
 // tells that a modal layer of the gallery is open over the window.
 // safariTab leaves Tab to fields, as Safari does, in the next view made.
+// contentRules hides the demonstration page's sponsored banner; rules is
+// what it compiled on first use.
 type webViewDemo struct {
-	view      *mygo.WebView
-	err       error
-	loaded    string
-	menu      bool
-	covered   bool
-	safariTab bool
+	view         *mygo.WebView
+	err          error
+	loaded       string
+	menu         bool
+	covered      bool
+	safariTab    bool
+	contentRules bool
+	rules        *mygo.ContentRules
+	rulesErr     error
+	rulesPending bool
+	window       func() *mygo.Window
 }
 
 func (d *webViewDemo) start(create func() (*mygo.WebView, error)) {
@@ -45,17 +52,77 @@ func (d *webViewDemo) close() {
 }
 
 // newWebView names Gallery in the page's user agent, after the system web
-// engine's own.
+// engine's own. A view made again keeps rules already compiled.
 func (g *Gallery) newWebView() (*mygo.WebView, error) {
-	return g.Shell.Window().NewWebView(mygo.WebViewOptions{Page: mygo.PageOptions{
+	d := &g.mygoState("WebView", "Default", true).webView
+	page := mygo.PageOptions{
 		UserAgentSuffix: "OnevraGallery/" + galleryVersion,
-		SafariTabFocus:  g.mygoState("WebView", "Default", true).webView.safariTab,
-	}})
+		SafariTabFocus:  d.safariTab,
+	}
+	if d.contentRules && d.rules != nil {
+		page.ContentRules = []*mygo.ContentRules{d.rules}
+	}
+	return g.Shell.Window().NewWebView(mygo.WebViewOptions{Page: page})
+}
+
+// setContentRules compiles the rules off the UI thread on first use, then
+// applies them to the view and reloads it: rules reach the loads from then
+// on, and leave what the page loaded until it reloads.
+func (d *webViewDemo) setContentRules() {
+	if !d.contentRules || d.rules != nil {
+		d.applyContentRules()
+		return
+	}
+	if d.rulesPending {
+		return
+	}
+	w := d.window()
+	if w == nil {
+		return
+	}
+	d.rulesPending = true
+	go func() {
+		rules, err := mygo.CompileContentRules(webViewContentRulesID, webViewContentRules)
+		w.Update(func() {
+			d.rulesPending = false
+			d.rules, d.rulesErr = rules, err
+			if err == nil {
+				d.applyContentRules()
+			}
+			w.Invalidate()
+		})
+	}()
+}
+
+func (d *webViewDemo) applyContentRules() {
+	if d.view == nil {
+		return
+	}
+	if d.contentRules {
+		d.view.Page().SetContentRules(d.rules)
+	} else {
+		d.view.Page().SetContentRules()
+	}
+	d.reload()
+}
+
+// reload shows the page again under the rules just set.
+func (d *webViewDemo) reload() {
+	if d.view != nil && d.loaded != "" {
+		d.view.Page().LoadHTML(d.loaded, webViewBaseURL)
+	}
 }
 
 // webViewBaseURL gives the demonstration page a real origin, so the page's
 // document.cookie and the native Cookies module share one store.
 const webViewBaseURL = "https://example.com/"
+
+// webViewContentRules hide the demonstration page's sponsored banner, as an
+// ad blocker would, and leave the rest of the page alone.
+const webViewContentRules = `[
+	{"trigger": {"url-filter": ".*"}, "action": {"type": "css-display-none", "selector": ".sponsored"}}]`
+
+const webViewContentRulesID = "gallery-web-view"
 
 var webViewPage = template.Must(template.New("page").Parse(`<!doctype html>
 <html lang="{{.Lang}}"><head><meta charset="utf-8"><style>
@@ -65,11 +132,14 @@ h1 { margin: 0 0 8px; font-size: 20px; }
 h2 { margin: 24px 0 8px; font-size: 16px; }
 p { margin: 0 0 16px; color: {{.Muted}}; }
 code { font: 12px/1.5 ui-monospace, Menlo, monospace; color: {{.Muted}}; }
+.sponsored { margin: 0 0 16px; padding: 10px 12px; border-radius: 8px;
+	background: {{.Accent}}; color: {{.AccentText}}; }
 .row { display: flex; gap: 8px; align-items: center; }
 input, button { font: inherit; padding: 6px 10px; border-radius: 6px; border: 1px solid {{.Border}};
 	background: transparent; color: inherit; }
 button { background: {{.Accent}}; color: {{.AccentText}}; border-color: transparent; }
 </style></head><body>
+<div class="sponsored"><strong>{{.Sponsored}}</strong> {{.SponsoredBody}}</div>
 <h1>{{.Title}}</h1>
 <p>{{.Body}}</p>
 <div class="row">
@@ -114,13 +184,15 @@ func webViewHTML(c *ui.Context) string {
 		"Lang":       lang,
 		"Background": cssColor(t.Background), "Text": cssColor(t.Text), "Muted": cssColor(t.TextMuted),
 		"Border": cssColor(t.Border), "Accent": cssColor(t.Accent), "AccentText": cssColor(t.AccentText),
-		"Title":       tr(c, "aWebPageInsideNativeUi"),
-		"Body":        tr(c, "theSystemWebEngineRendersThisPageNativePopoversDialogsAnd"),
-		"Placeholder": tr(c, "typeIntoThePage"),
-		"Count":       tr(c, "count"),
-		"UserAgent":   tr(c, "webViewUserAgent"),
-		"Cookies":     tr(c, "webViewCookies"),
-		"CookieSet":   tr(c, "webViewCookieSet"),
+		"Title":         tr(c, "aWebPageInsideNativeUi"),
+		"Body":          tr(c, "theSystemWebEngineRendersThisPageNativePopoversDialogsAnd"),
+		"Placeholder":   tr(c, "typeIntoThePage"),
+		"Count":         tr(c, "count"),
+		"UserAgent":     tr(c, "webViewUserAgent"),
+		"Cookies":       tr(c, "webViewCookies"),
+		"CookieSet":     tr(c, "webViewCookieSet"),
+		"Sponsored":     tr(c, "webViewSponsored"),
+		"SponsoredBody": tr(c, "webViewSponsoredBody"),
 	})
 	return b.String()
 }
@@ -135,6 +207,7 @@ func exampleWebView(c *ui.Context, s *demoState) {
 	case d.view == nil:
 		components.Text(c, tr(c, "webViewsNeedANativeWindow")).TextColor(t.TextMuted).Wrap()
 	default:
+		d.window = s.system.window
 		if html := webViewHTML(c); d.loaded != html {
 			d.loaded = html
 			// Fill with the new theme until the reloaded page paints, not white.
@@ -161,6 +234,12 @@ func exampleWebView(c *ui.Context, s *demoState) {
 				c.Invalidate()
 			}
 		})
+		if components.Checkbox(c, &d.contentRules, tr(c, "webViewContentRules")).Changed() {
+			d.setContentRules()
+		}
+		if d.rulesErr != nil {
+			components.Text(c, tr(c, "webViewContentRulesFailed")+": "+d.rulesErr.Error()).TextColor(t.Danger).Wrap()
+		}
 		var frame ui.Element
 		if d.covered {
 			// Glass materials cannot see a web page under them, so a modal layer

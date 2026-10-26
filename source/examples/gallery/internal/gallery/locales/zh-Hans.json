@@ -1055,5 +1055,9 @@
   "notificationSender": "以 ONEO 的消息发送",
   "webViewUserAgent": "用户代理",
   "webViewSafariTab": "Tab 键仅切换输入框，与 Safari 相同",
+  "webViewContentRules": "隐藏页面上的广告",
+  "webViewContentRulesFailed": "内容规则失败",
+  "webViewSponsored": "赞助内容",
+  "webViewSponsoredBody": "演示广告；内容规则会将其隐藏。",
   "flyoutMaterial": "材质浮层"
 }

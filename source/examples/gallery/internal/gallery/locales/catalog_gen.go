@@ -10646,6 +10646,46 @@ func (msgs Messages) WebViewSafariTab() string {
 	return Catalog.Format(msgs.locale, "webViewSafariTab", nil)
 }
 
+// WebViewContentRules says "Hide the page's ad"
+// in the language the app shows.
+func WebViewContentRules() string { return In(i18n.Locale()).WebViewContentRules() }
+
+// WebViewContentRules says "Hide the page's ad"
+// in the language of msgs.
+func (msgs Messages) WebViewContentRules() string {
+	return Catalog.Format(msgs.locale, "webViewContentRules", nil)
+}
+
+// WebViewContentRulesFailed says "Content rules failed"
+// in the language the app shows.
+func WebViewContentRulesFailed() string { return In(i18n.Locale()).WebViewContentRulesFailed() }
+
+// WebViewContentRulesFailed says "Content rules failed"
+// in the language of msgs.
+func (msgs Messages) WebViewContentRulesFailed() string {
+	return Catalog.Format(msgs.locale, "webViewContentRulesFailed", nil)
+}
+
+// WebViewSponsored says "Sponsored"
+// in the language the app shows.
+func WebViewSponsored() string { return In(i18n.Locale()).WebViewSponsored() }
+
+// WebViewSponsored says "Sponsored"
+// in the language of msgs.
+func (msgs Messages) WebViewSponsored() string {
+	return Catalog.Format(msgs.locale, "webViewSponsored", nil)
+}
+
+// WebViewSponsoredBody says "A demonstration ad; content rules hide it."
+// in the language the app shows.
+func WebViewSponsoredBody() string { return In(i18n.Locale()).WebViewSponsoredBody() }
+
+// WebViewSponsoredBody says "A demonstration ad; content rules hide it."
+// in the language of msgs.
+func (msgs Messages) WebViewSponsoredBody() string {
+	return Catalog.Format(msgs.locale, "webViewSponsoredBody", nil)
+}
+
 // FlyoutMaterial says "Material flyout"
 // in the language the app shows.
 func FlyoutMaterial() string { return In(i18n.Locale()).FlyoutMaterial() }

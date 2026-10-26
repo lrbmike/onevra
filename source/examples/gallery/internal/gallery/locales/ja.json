@@ -1055,5 +1055,9 @@
   "notificationSender": "ONEO からのメッセージとして送信",
   "webViewUserAgent": "ユーザーエージェント",
   "webViewSafariTab": "Safari と同様に Tab で入力欄のみ移動",
+  "webViewContentRules": "ページの広告を隠す",
+  "webViewContentRulesFailed": "コンテンツルールに失敗しました",
+  "webViewSponsored": "スポンサー",
+  "webViewSponsoredBody": "デモ用の広告です。コンテンツルールで非表示になります。",
   "flyoutMaterial": "マテリアルのフライアウト"
 }

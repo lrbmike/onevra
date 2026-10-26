@@ -1,6 +1,7 @@
 package gallery
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -84,5 +85,33 @@ func TestWebViewHTMLFollowsThemeAndLanguage(t *testing.T) {
 	}
 	if !strings.Contains(pages[fmt.Sprint(false, "zh-Hans")], "原生界面中的网页") {
 		t.Error("Chinese page is not translated")
+	}
+}
+
+func TestWebViewContentRules(t *testing.T) {
+	var rules []struct {
+		Trigger struct {
+			URLFilter string `json:"url-filter"`
+		} `json:"trigger"`
+		Action struct {
+			Type     string `json:"type"`
+			Selector string `json:"selector"`
+		} `json:"action"`
+	}
+	if err := json.Unmarshal([]byte(webViewContentRules), &rules); err != nil {
+		t.Fatal(err)
+	}
+	if len(rules) != 1 || rules[0].Trigger.URLFilter != ".*" ||
+		rules[0].Action.Type != "css-display-none" || rules[0].Action.Selector != ".sponsored" {
+		t.Fatalf("rules = %+v", rules)
+	}
+	g := &Gallery{language: newTranslator("en", "")}
+	var page string
+	ui.NewTester(func(c *ui.Context) {
+		c.SetTheme(theme.Palette(false))
+		g.withLanguage(c, func() { page = webViewHTML(c) })
+	}, 200, 200)
+	if !strings.Contains(page, `class="sponsored"`) || !strings.Contains(page, g.text("webViewSponsoredBody")) {
+		t.Fatalf("page lacks its sponsored banner: %s", page)
 	}
 }

@@ -17,7 +17,9 @@ var navigationGroups = []string{
 // new however often it changes.
 var newPages = map[string]bool{}
 
-var updatedPages = map[string]bool{}
+var updatedPages = map[string]bool{
+	"mygo/WebView": true,
+}
 
 type navigationEntry struct {
 	label string

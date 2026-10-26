@@ -80,6 +80,8 @@ func TestFloatingConversationScrollbarClearsComposer(t *testing.T) {
 						}
 					}
 					// The shortened track still reaches the end of the transcript.
+					// A press takes only a shown bar, and the click below hid it.
+					tt.Move(x, 8)
 					tt.Press(x, 8)
 					tt.Move(x, trackBottom-2)
 					tt.Release(x, trackBottom-2)

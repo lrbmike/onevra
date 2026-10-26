@@ -1055,5 +1055,9 @@
   "notificationSender": "ONEO의 메시지로 보내기",
   "webViewUserAgent": "사용자 에이전트",
   "webViewSafariTab": "Safari처럼 Tab으로 입력란만 이동",
+  "webViewContentRules": "페이지의 광고 숨기기",
+  "webViewContentRulesFailed": "콘텐츠 규칙 실패",
+  "webViewSponsored": "스폰서",
+  "webViewSponsoredBody": "데모 광고입니다. 콘텐츠 규칙이 숨깁니다.",
   "flyoutMaterial": "머티리얼 플라이아웃"
 }

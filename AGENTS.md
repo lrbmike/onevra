@@ -34,14 +34,15 @@ Scale the [development checks](docs/build.md#development-checks) to the change.
 
 ## Documentation
 
-- Update a document only when a fact its reader needs changes. Each fact has one owner; link rather than repeat.
-- Keep each document within its budget and written for its reader. Website API sections read doc comments; keep them accurate.
-- Update `skills/onevra/` when basic usage, component choices, testing or packaging change.
+- Update a document only when a fact its reader needs changes; link rather than repeat.
+- Avoid secondary labels and descriptions that restate a heading or value; let the layout explain.
+- Keep each document within its budget and written for its reader. Keep website API doc comments accurate.
+- Update `skills/onevra/` when usage, component choices, testing or packaging change.
 - Repair documents you touch instead of only appending to them.
-- Keep `README.md` and `README.zh-CN.md` equivalent. Everything else, including comments, is English except maintained translations and multilingual fixtures.
-- Record consumer-visible outcomes under `Unreleased` as one verb-first clause naming the public API, with no colon, semicolon or "which" clause.
+- Keep READMEs equivalent. Everything else, including comments, is English except maintained translations and multilingual fixtures.
+- Record consumer-visible outcomes under `Unreleased` as one verb-first clause naming the public API, without a colon, semicolon or "which" clause.
 - Omit refactors, layout, tests, tooling, styling, copy and gallery-only changes.
-- Prefix breaking changes with `Breaking:`, naming at most the replacement. Record a MyGo upgrade as the required version alone, first in its group.
-- Order each version's single list as `Breaking:`, Add, other verbs, then Fix; merge related entries.
+- Prefix breaking changes with `Breaking:`, naming at most the replacement. Record a MyGo upgrade as the required version alone, first.
+- Order each version's list as `Breaking:`, Add, other, Fix; merge related entries.
 - Keep documentation on the code branch and reconcile it during merges.
-- Check budgets, Subjects, links, anchors and changelog structure; run `git diff --check` at the repository root.
+- Check budgets, Subjects, links, anchors and changelog structure; run `git diff --check`.

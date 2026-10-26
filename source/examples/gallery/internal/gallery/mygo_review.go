@@ -118,7 +118,7 @@ var mygoDirectExamples = map[string]string{
 	"Transforms":         "Use MyGo element transforms directly so drawing, input, accessibility and overlays share coordinates",
 	"Motion":             "Use MyGo animation methods directly for scheduling, interruption and reduced motion; no Onevra animation runtime",
 	"Flyout":             "Use MyGo parent-owned native popup windows directly; applications own content and lifetime",
-	"WebView":            "Use MyGo web views and Cookies directly; applications own their pages and windows",
+	"WebView":            "Use MyGo web views, content rules and Cookies directly; applications own their pages, rules and windows",
 	"System information": "Use MyGo Network, Secrets, FontFamilies, desktop preferences and locales directly; applications own their reactions, choices and storage",
 	"Recent documents":   "Use MyGo recent documents and the jump list directly; applications own their files",
 	"File watching":      "Use MyGo WatchFiles directly; applications own the watched paths and their lifetime",

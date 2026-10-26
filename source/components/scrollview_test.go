@@ -83,6 +83,9 @@ func TestScrollViewInsets(t *testing.T) {
 			}
 			if axes == ScrollVertical {
 				// The vertical thumb begins below the top inset, inset from the right.
+				// MyGo shows the bars while the view is hovered, and only a shown bar
+				// takes a press.
+				tt.Move(184, 48)
 				tt.Press(184, 48)
 				tt.Move(184, 178)
 				tt.Release(184, 178)
@@ -91,6 +94,7 @@ func TestScrollViewInsets(t *testing.T) {
 				}
 			} else {
 				// The horizontal thumb begins after the left inset, above the bottom inset.
+				tt.Move(40, 174)
 				tt.Press(40, 174)
 				tt.Move(188, 174)
 				tt.Release(188, 174)

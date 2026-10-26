@@ -1487,5 +1487,9 @@
   "notificationSender": "Send as a message from ONEO",
   "webViewUserAgent": "User agent",
   "webViewSafariTab": "Tab only to fields, as in Safari",
+  "webViewContentRules": "Hide the page's ad",
+  "webViewContentRulesFailed": "Content rules failed",
+  "webViewSponsored": "Sponsored",
+  "webViewSponsoredBody": "A demonstration ad; content rules hide it.",
   "flyoutMaterial": "Material flyout"
 }

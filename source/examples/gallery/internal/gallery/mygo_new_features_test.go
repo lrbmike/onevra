@@ -255,14 +255,17 @@ func TestUpdatedComponentsGroup(t *testing.T) {
 		want[pageFromKey(key)] = true
 	}
 	mygoGroups := mygoNavigationGroups()
-	// The MyGo list has an Updated components group only while MyGo pages
-	// are updated, directly after its New components group.
-	if len(updatedNavigationEntries(true)) > 0 {
-		if len(mygoGroups) < 2 || mygoGroups[1].label != updatedGroupLabel {
-			t.Fatalf("MyGo list must follow its New components group with Updated: %v", mygoGroups)
-		}
-	} else {
-		mygoGroups = append([]navigationGroup{{}, {}}, mygoGroups...)
+	// The MyGo list omits an empty New or Updated components group; insert
+	// placeholders so both keep their fixed positions here.
+	if len(newNavigationEntries(true)) == 0 {
+		mygoGroups = append([]navigationGroup{{}}, mygoGroups...)
+	} else if mygoGroups[0].label != newGroupLabel {
+		t.Fatalf("MyGo list must start with its New components group: %v", mygoGroups[0])
+	}
+	if len(updatedNavigationEntries(true)) == 0 {
+		mygoGroups = slices.Insert(mygoGroups, 1, navigationGroup{})
+	} else if len(mygoGroups) < 2 || mygoGroups[1].label != updatedGroupLabel {
+		t.Fatalf("MyGo list must follow its New components group with Updated: %v", mygoGroups)
 	}
 	mygoUpdated := mygoGroups[1].entries
 	for _, entry := range groups[2].entries {
