@@ -12,6 +12,23 @@ upstream/main ──ff-only──> main（镜像）        local（各项目 rep
                           └──cherry-pick──> xxx-主题分支（单个改动）
 ```
 
+**主 checkout 常驻 `local`**：`replace` 认目录不认分支，两个桌面项目读的就是
+`~/workspaces/mine/onevra` 当前检出的内容。停在 `main` 会丢掉所有补丁（Float
+直接编译失败，Calico 丢 `ConversationState.Width` 与 `inputHeight` 修复）；
+停在某个主题分支则丢掉别的主题。
+
+写主题分支时用独立 worktree，让主 checkout 一直待在 `local`：
+
+```sh
+git worktree add ../onevra-topic -b conversation-width upstream/main
+# 在 ../onevra-topic 里改、提交
+git checkout local && git cherry-pick conversation-width   # 主 checkout 只做这一步
+git worktree remove ../onevra-topic
+git push -u origin conversation-width
+```
+
+只读地看上游代码不必切分支：`git show upstream/main:<path>`、`git log -p`。
+
 ## 补丁准入规则
 
 `replace` 指向的是一个工作树，同一时刻只能检出一个分支，所以**分支按「是否
