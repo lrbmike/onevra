@@ -414,6 +414,9 @@ func Bubble(c *ui.Context, content View) ui.Element {
 // or anchor prepended rows. Applications must bound retained history themselves.
 type ConversationState struct {
 	Scroll ui.ScrollState
+	// Width overrides ContentWidth for this transcript; zero uses the default.
+	// Match it to the composer the application pairs with the transcript.
+	Width  float32
 	paused bool
 	pauseY float32
 }
@@ -454,11 +457,15 @@ func Conversation(c *ui.Context, state *ConversationState, jumpLabel string, con
 	if follow {
 		state.JumpToLatest()
 	}
+	width := float32(ContentWidth)
+	if state.Width > 0 {
+		width = state.Width
+	}
 	return ui.Column(c).FillWidth().Grow(1).MinHeight(0).MinWidth(0).Children(func() {
 		viewport := components.ScrollView(c, components.ScrollViewOptions{}).Key("viewport").FillWidth().Grow(1).MinHeight(0).TrackScroll(&state.Scroll)
 		viewport.Children(func() {
 			ui.Column(c).FillWidth().MinWidth(0).Shrink(0).AlignItems(ui.Center).Padding(22, 20).Children(func() {
-				ui.Column(c).FillWidth().MaxWidth(ContentWidth).MinWidth(0).Gap(48).Children(func() {
+				ui.Column(c).FillWidth().MaxWidth(width).MinWidth(0).Gap(48).Children(func() {
 					slot := conversationSlot(c)
 					saved := *slot
 					*slot = conversationScope{state: state, previousY: previousY, reading: !follow}
