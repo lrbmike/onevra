@@ -1,29 +1,44 @@
 # 本 fork 携带的本地补丁
 
-本 fork 服务于 Float Desktop（`lrbmike/Float-Desktop`）的本地依赖开发模式：
-桌面项目通过 `go mod replace` 引用本仓库检出，`main` 分支只做上游
-（`oneo-me/onevra`）的镜像，**永不承载改动**；所有为桌面需求做的修改
-都走 `float-local` 分支。
+本 fork 服务于本地桌面项目（Float Desktop、Calico Studio）的本地依赖开发
+模式：桌面项目通过 `go mod replace` 引用本仓库检出，`main` 分支只做上游
+（`oneo-me/onevra`）的镜像，**永不承载改动**；所有为桌面需求做的修改都走
+`local` 分支。`local` 是所有项目共用的唯一稳定面，不按项目分叉。
 
 ## 分支拓扑
 
 ```
-upstream/main ──ff-only──> main（镜像）        float-local（桌面引用的稳定面）
+upstream/main ──ff-only──> main（镜像）        local（各项目 replace 的稳定面）
                           └──cherry-pick──> xxx-主题分支（单个改动）
 ```
+
+## 补丁准入规则
+
+`replace` 指向的是一个工作树，同一时刻只能检出一个分支，所以**分支按「是否
+改变他人行为」切，不按项目切**：
+
+1. **可选参数优先**：加字段、加选项、加回调，零值等于旧行为。这类改动放
+   `local`，其他项目无感。
+2. **不改共享默认值**：某个项目嫌 720 窄就给自己的 `ConversationState`
+   传 860，而不是把 `ContentWidth` 改成 860——那会同时改掉所有使用方。
+3. **项目独有逻辑留在项目仓库**：界面编排、业务流程、文案在 app 里用现有
+   组件组装，不进本库。
+4. **确实无法参数化时才考虑分叉**：同一组件在两个项目里必须行为不同、且
+   抽象表达不了时，先改抽象（插槽 / hook / 回调）；仍做不到才开项目专属
+   分支，并且必须配独立 worktree（`git worktree add`，一份 checkout 只能
+   待在一个分支）+ 在下方补丁清单里记明它与 `local` 的合并责任。
 
 ## 同步与冲突规则
 
 1. 上游推进后：`main` 用 `git merge --ff-only upstream/main` 快进。
-2. `float-local` 同步上游：`git merge main`（用 merge 不用 rebase，保留
+2. `local` 同步上游：`git merge main`（用 merge 不用 rebase，保留
    冲突解决的历史），冲突按语义裁决——
    - 纯上游演进相关 → 取**上游**；
-   - 与 Float 需求相关 → 取**本 fork**。
+   - 与桌面需求相关 → 取**本 fork**。
 3. 新增补丁：先从 `upstream/main` 切主题分支提交，再 cherry-pick 进
-   `float-local`；优先"加文件/加可选参数"而不是改热点路径，把冲突面
-   压到底。
+   `local`；优先"加文件/加可选参数"而不是改热点路径，把冲突面压到底。
 4. 上游以其他写法吸收了某个主题后：从 `upstream/main` + 剩余主题重建
-   `float-local`，作废对应主题分支。
+   `local`，作废对应主题分支。
 
 ## 补丁清单
 
