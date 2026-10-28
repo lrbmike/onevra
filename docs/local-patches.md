@@ -28,6 +28,34 @@ upstream/main ──ff-only──> main（镜像）        local（各项目 rep
    分支，并且必须配独立 worktree（`git worktree add`，一份 checkout 只能
    待在一个分支）+ 在下方补丁清单里记明它与 `local` 的合并责任。
 
+## 动手前与落地后的检查
+
+主题分支从 `upstream/main` 切、`local` 才装全部补丁，两边因此可能错开版本。
+下面三步把"在别人没跑的代码上写补丁"挡在提交之前：
+
+1. **先对齐上游再切分支**（顺序不能反）：
+
+   ```sh
+   git checkout main && git merge --ff-only upstream/main
+   git checkout local && git merge main
+   git log --oneline local..upstream/main   # 必须为空，非空说明还没同步干净
+   ```
+
+   在落后于 `local` 的上游上写补丁，cherry-pick 只按文本判断冲突：上游改了同一
+   段逻辑但行位置错开时，它会"干净通过"，语义却是错的。
+
+2. **看目标文件已被哪些补丁动过**，避免与已有主题踩在同一段代码上：
+
+   ```sh
+   git diff upstream/main local -- source/components/chat/chat.go
+   ```
+
+   有重叠就先想清楚是扩展既有参数，还是新增一个（准入规则第 1 条）。
+
+3. **cherry-pick 后每个桌面项目各自跑全量测试**——文本冲突 Git 会报，语义回归
+   只有项目自己的测试能发现（Float Desktop 与 Calico Studio 都是
+   `go test -count=1 ./internal/app/`，Calico 另加 `-race`）。
+
 ## 同步与冲突规则
 
 1. 上游推进后：`main` 用 `git merge --ff-only upstream/main` 快进。
