@@ -46,3 +46,14 @@ Scale the [development checks](docs/build.md#development-checks) to the change.
 - Order each version's list as `Breaking:`, Add, other, Fix; merge related entries.
 - Keep documentation on the code branch and reconcile it during merges.
 - Check budgets, Subjects, links, anchors and changelog structure; run `git diff --check`.
+
+## Local fork (this checkout)
+
+This checkout serves the user's desktop applications (Float Desktop, Calico
+Studio) through `go mod replace`. `main` mirrors upstream and never carries
+changes; patches are cherry-picked into `local`, which every project compiles
+against — keep this checkout on `local`, and do topic-branch work outside it
+(the user creates the worktree; this AGENTS.md forbids agents creating one). Read
+[docs/local-patches.md](docs/local-patches.md) before changing code: patches
+must be optional (zero value keeps the old behaviour) and must not change
+shared defaults.

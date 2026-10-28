@@ -29,6 +29,9 @@ git push -u origin conversation-width
 
 只读地看上游代码不必切分支：`git show upstream/main:<path>`、`git log -p`。
 
+worktree 由人创建：本仓库 `AGENTS.md` 明确禁止 agent 自行建 worktree，agent 只
+在已存在的主题 worktree 里改代码。
+
 ## 补丁准入规则
 
 `replace` 指向的是一个工作树，同一时刻只能检出一个分支，所以**分支按「是否
