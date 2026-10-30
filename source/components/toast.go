@@ -53,10 +53,14 @@ func (p ToastPlacement) align() ui.Align {
 // ToastOptions customizes where Toasts places the window's toasts. The zero
 // value stacks at the top center. Inset adds DIPs at the placement's edge beyond
 // the standard margin, for example to clear a title bar; Shell adds its header
-// height to top placements itself.
+// height to top placements itself. ShiftX adds DIPs of padding at the left
+// edge, shifting a centered stack toward the right by half of it; pass the
+// width of a left sidebar to center over the content pane instead of the
+// whole window. The viewport itself always spans the window.
 type ToastOptions struct {
 	Placement ToastPlacement
 	Inset     float32
+	ShiftX    float32
 }
 
 // Toasts builds the window's MyGo toasts in the Onevra style, replacing MyGo's
@@ -94,10 +98,11 @@ func Toasts(c *ui.Context, options ...ToastOptions) ui.Element {
 		Enter: &ui.Motion{Y: -dir * t.Space(16)}, Exit: &ui.Motion{Scale: .96}}
 	return ui.ToastViewportBase(c, func(viewport ui.Element, toasts []ui.Toast) {
 		viewport.AlignItems(o.Placement.align())
+		shift := max(0, o.ShiftX)
 		if top {
-			viewport.Justify(ui.Start).Padding(margin+inset, margin, margin, margin)
+			viewport.Justify(ui.Start).Padding(margin+inset, margin, margin, margin+shift)
 		} else {
-			viewport.Padding(margin, margin, margin+inset, margin)
+			viewport.Padding(margin, margin, margin+inset, margin+shift)
 		}
 		// The stack takes the pointer across the gaps between fanned-out
 		// toasts, so that crossing them keeps the stack open.
